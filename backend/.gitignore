@@ -27,3 +27,4 @@ coverage/
 
 # Test
 test-env.js
+test-imports.js

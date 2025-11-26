@@ -1,5 +1,5 @@
 {
-  "name": "api-dashboard-backend",
+  "name": "medical-sync-dashboard-backend",
   "version": "1.0.0",
   "description": "Backend API para dashboard de atenciones",
   "keywords": [
@@ -7,7 +7,7 @@
     "healthcare",
     "dashboard"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "author": "Iván Jaque Pinto",
   "type": "module",
   "main": "server.js",
