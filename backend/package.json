@@ -1,0 +1,51 @@
+{
+  "name": "api-dashboard-backend",
+  "version": "1.0.0",
+  "description": "Backend API para dashboard de atenciones",
+  "keywords": [
+    "api",
+    "healthcare",
+    "dashboard"
+  ],
+  "license": "ISC",
+  "author": "Iván Jaque Pinto",
+  "type": "module",
+  "main": "server.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test jest --detectOpenHandles --forceExit",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "migrate": "node src/models/index.js",
+    "seed": "node src/utils/seedAdmin.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.32.0",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.1.4"
+  }
+}
