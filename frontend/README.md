@@ -496,7 +496,7 @@ MIT
 **Iván Jaque Pinto**
 
 - GitHub: [@IJaqueP](https://github.com/IJaqueP)
-- Email: admin@sistema.com
+- Email: ijaquepinto@gmail.com
 
 ## 🤝 Contribuir
 
