@@ -146,13 +146,15 @@ async function startServer() {
         // 2. Probar conexión a la base de datos
         await testConnection();
         
-        // 3. Sincronizar modelos (solo en desarrollo, en producción usar migraciones)
+        // 3. Sincronizar modelos con la base de datos
+        logger.logInfo('🔄 Sincronizando modelos con la base de datos...');
         if (process.env.NODE_ENV !== 'production') {
-            logger.logInfo('🔄 Sincronizando modelos con la base de datos...');
             await sequelize.sync({ alter: true });
-            logger.logInfo('✅ Modelos sincronizados');
+            logger.logInfo('✅ Modelos sincronizados (desarrollo)');
         } else {
-            logger.logInfo('🏭 Modo producción: omitiendo sync (usar migraciones)');
+            // En producción: crear tablas si no existen (sin alter)
+            await sequelize.sync({ alter: false });
+            logger.logInfo('✅ Tablas verificadas/creadas (producción)');
         }
         
         // 4. Crear usuario admin inicial si no existe
