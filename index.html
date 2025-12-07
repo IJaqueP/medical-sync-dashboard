@@ -4,8 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/medical-sync-dashboard/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-    <script type="module" crossorigin src="/medical-sync-dashboard/assets/index-CzwTTm3B.js"></script>
+    <title>Medical Sync Dashboard</title>
+    
+    <!-- GitHub Pages SPA redirect -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === '/' ) {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&')
+          }).join('?');
+          window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      }(window.location))
+    </script>
+    <script type="module" crossorigin src="/medical-sync-dashboard/assets/index-pVfg5MSL.js"></script>
     <link rel="stylesheet" crossorigin href="/medical-sync-dashboard/assets/index-NMEHigiM.css">
   </head>
   <body>
