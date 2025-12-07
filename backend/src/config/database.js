@@ -16,6 +16,10 @@ const sequelize = new Sequelize(
         logging: config.database.logging,
         pool: config.database.pool,
         dialectOptions: {
+            ssl: process.env.NODE_ENV === 'production' ? {
+                require: true,
+                rejectUnauthorized: false
+            } : false,
             connectTimeout: 60000
         },
         define: {
