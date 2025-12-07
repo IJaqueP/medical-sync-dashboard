@@ -97,7 +97,8 @@ export const getSyncHistory = catchAsync(async (req, res) => {
         include: [{
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'fullName']
+            attributes: ['id', 'username', 'fullName'],
+            required: false // Hacer el join opcional
         }]
     });
     
@@ -124,7 +125,8 @@ export const getLastSyncByAPI = catchAsync(async (req, res) => {
         include: [{
             model: User,
             as: 'user',
-            attributes: ['id', 'username', 'fullName']
+            attributes: ['id', 'username', 'fullName'],
+            required: false // Hacer el join opcional
         }]
     });
     
