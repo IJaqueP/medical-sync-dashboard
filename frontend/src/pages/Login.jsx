@@ -66,6 +66,7 @@ const Login = () => {
               value={formData.credential}
               onChange={handleChange}
               placeholder="Ingresa tu usuario"
+              autoComplete="username"
               disabled={loading}
             />
           </div>
@@ -79,6 +80,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Ingresa tu contraseña"
+              autoComplete="current-password"
               disabled={loading}
             />
           </div>

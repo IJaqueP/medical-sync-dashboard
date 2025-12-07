@@ -1,4 +1,5 @@
 /* --- SERVIDOR PRINCIPAL - BACKEND --- */
+// Updated: 2025-12-07 - Fix sync logs query
 
 import express from 'express';
 import cors from 'cors';

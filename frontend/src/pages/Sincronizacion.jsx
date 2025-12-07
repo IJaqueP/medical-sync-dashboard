@@ -20,9 +20,12 @@ const Sincronizacion = () => {
     setError('');
     try {
       const data = await syncService.getLogs({ limit: 50 });
+      console.log('Datos recibidos de syncService.getLogs:', data);
       const logsList = Array.isArray(data) ? data : (data.logs || []);
+      console.log('Logs procesados:', logsList);
       setLogs(logsList);
     } catch (err) {
+      console.error('Error al cargar logs:', err);
       setError(err.message || 'Error al cargar los logs');
       setLogs([]);
     } finally {
