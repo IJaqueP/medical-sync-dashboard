@@ -1,5 +1,5 @@
 /* --- SERVIDOR PRINCIPAL - BACKEND --- */
-// Updated: 2025-12-08 00:19 - Force rebuild with cache clear
+// Updated: 2025-12-08 00:31 - Force restart after DB migration
 
 import express from 'express';
 import cors from 'cors';
