@@ -134,6 +134,55 @@ app.get('/debug/sync-logs', async (req, res) => {
     }
 });
 
+// Seed endpoint - TEMPORAL - SOLO PARA PRODUCCIÓN
+app.post('/debug/seed-db', async (req, res) => {
+    if (process.env.NODE_ENV !== 'production') {
+        return res.status(403).json({ error: 'Solo disponible en producción' });
+    }
+    
+    try {
+        const { SyncLog } = models;
+        
+        // Limpiar datos existentes
+        await sequelize.query('TRUNCATE sync_logs CASCADE');
+        
+        // Crear 30 logs de prueba
+        const logs = [];
+        const apis = ['reservo', 'snabb', 'dtemite'];
+        const statuses = ['success', 'success', 'success', 'success', 'error']; // 80% éxito
+        
+        for (let i = 0; i < 30; i++) {
+            logs.push({
+                apiName: apis[Math.floor(Math.random() * apis.length)],
+                syncType: 'manual',
+                status: statuses[Math.floor(Math.random() * statuses.length)],
+                startTime: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+                recordsProcessed: Math.floor(Math.random() * 50),
+                recordsCreated: Math.floor(Math.random() * 20),
+                recordsUpdated: Math.floor(Math.random() * 15),
+                recordsError: Math.floor(Math.random() * 5),
+                errorDetails: Math.random() > 0.8 ? 'Timeout en la conexión' : null
+            });
+        }
+        
+        // Insertar uno por uno
+        for (const log of logs) {
+            await SyncLog.create(log);
+        }
+        
+        const count = await SyncLog.count();
+        
+        res.json({
+            success: true,
+            message: 'Base de datos poblada',
+            totalInserted: logs.length,
+            totalInDB: count
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // Ruta raíz
 app.get('/', (req, res) => {
     res.json({
