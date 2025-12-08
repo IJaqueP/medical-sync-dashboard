@@ -1,5 +1,5 @@
 /* --- SERVIDOR PRINCIPAL - BACKEND --- */
-// Updated: 2025-12-07 - Fix sync logs query
+// Updated: 2025-12-08 00:19 - Force rebuild with cache clear
 
 import express from 'express';
 import cors from 'cors';
