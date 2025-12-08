@@ -102,6 +102,26 @@ app.get('/health', (req, res) => {
     });
 });
 
+// Debug endpoint - TEMPORAL
+app.get('/debug/sync-logs', async (req, res) => {
+    try {
+        const { SyncLog } = models;
+        const count = await SyncLog.count();
+        const logs = await SyncLog.findAll({ limit: 3, order: [['id', 'DESC']] });
+        res.json({
+            total: count,
+            sample: logs,
+            dbConfig: {
+                host: config.database.host,
+                database: config.database.name,
+                dialect: config.database.dialect
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // Ruta raíz
 app.get('/', (req, res) => {
     res.json({
