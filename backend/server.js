@@ -105,12 +105,24 @@ app.get('/health', (req, res) => {
 // Debug endpoint - TEMPORAL
 app.get('/debug/sync-logs', async (req, res) => {
     try {
+        // Query directa SQL para verificar
+        const [rawResults] = await sequelize.query('SELECT COUNT(*) as count FROM sync_logs');
+        const [rawLogs] = await sequelize.query('SELECT * FROM sync_logs ORDER BY id DESC LIMIT 3');
+        
+        // Query usando modelo
         const { SyncLog } = models;
-        const count = await SyncLog.count();
-        const logs = await SyncLog.findAll({ limit: 3, order: [['id', 'DESC']] });
+        const modelCount = await SyncLog.count();
+        const modelLogs = await SyncLog.findAll({ limit: 3, order: [['id', 'DESC']] });
+        
         res.json({
-            total: count,
-            sample: logs,
+            rawQuery: {
+                total: rawResults[0].count,
+                sample: rawLogs
+            },
+            modelQuery: {
+                total: modelCount,
+                sample: modelLogs
+            },
             dbConfig: {
                 host: config.database.host,
                 database: config.database.name,
