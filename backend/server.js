@@ -134,6 +134,32 @@ app.get('/debug/sync-logs', async (req, res) => {
     }
 });
 
+// Endpoint para limpiar base de datos - SOLO PRODUCCIÓN
+app.post('/debug/clean-db', async (req, res) => {
+    if (process.env.NODE_ENV !== 'production') {
+        return res.status(403).json({ error: 'Solo disponible en producción' });
+    }
+    
+    try {
+        // Limpiar tablas
+        await sequelize.query('TRUNCATE TABLE atenciones RESTART IDENTITY CASCADE');
+        await sequelize.query('TRUNCATE TABLE sync_logs RESTART IDENTITY CASCADE');
+        
+        // Verificar
+        const [atencionesCount] = await sequelize.query('SELECT COUNT(*) as count FROM atenciones');
+        const [syncLogsCount] = await sequelize.query('SELECT COUNT(*) as count FROM sync_logs');
+        
+        res.json({
+            success: true,
+            message: 'Base de datos limpia - Lista para datos reales',
+            atenciones: atencionesCount[0].count,
+            syncLogs: syncLogsCount[0].count
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 // Ruta raíz
 app.get('/', (req, res) => {
     res.json({
