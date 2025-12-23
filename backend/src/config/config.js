@@ -48,8 +48,8 @@ export const config = {
     snabb: {
         apiUrl: process.env.SNABB_API_URL,
         apiKey: process.env.SNABB_API_KEY,
-        organizationId: process.env.SNABB_ORGANIZATION_ID,
-        timeout: 300000
+        organizationRut: process.env.SNABB_ORGANIZATION_RUT,
+        timeout: 30000
     },
 
 
