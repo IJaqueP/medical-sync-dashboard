@@ -268,9 +268,9 @@ async function startServer() {
             await sequelize.sync({ alter: true });
             logger.logInfo('✅ Modelos sincronizados (desarrollo)');
         } else {
-            // En producción: crear tablas si no existen (sin alter)
-            await sequelize.sync({ alter: false });
-            logger.logInfo('✅ Tablas verificadas/creadas (producción)');
+            // En producción: sincronizar con alter para actualizar columnas
+            await sequelize.sync({ alter: true });
+            logger.logInfo('✅ Tablas sincronizadas con alter (producción)');
         }
         
         // 4. Crear usuario admin inicial si no existe
