@@ -65,12 +65,7 @@ export const getAllAtenciones = catchAsync(async (req, res) => {
         where,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        order: [['fechaCita', 'DESC']],
-        include: [{
-            model: User,
-            as: 'modifier',
-            attributes: ['id', 'username', 'fullName']
-        }]
+        order: [['createdAt', 'DESC']]
     });
     
     res.json({
