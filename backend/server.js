@@ -19,6 +19,7 @@ import atencionRoutes from './src/routes/atenciones.js';
 import syncRoutes from './src/routes/sync.js';
 import reportRoutes from './src/routes/reports.js';
 import snabbRoutes from './src/routes/snabb.js';
+import reservoRoutes from './src/routes/reservo.js';
 
 // Importar middleware de manejo de errores
 import { errorHandler, notFound } from './src/middleware/errorHandle.js';
@@ -223,7 +224,8 @@ app.get('/', (req, res) => {
             atenciones: '/api/atenciones',
             sync: '/api/sync',
             reports: '/api/reports',
-            snabb: '/api/snabb'
+            snabb: '/api/snabb',
+            reservo: '/api/reservo'
         },
         documentation: '/api/docs',
         health: '/health'
@@ -237,6 +239,7 @@ app.use('/api/atenciones', atencionRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/snabb', snabbRoutes);
+app.use('/api/reservo', reservoRoutes);
 
 // Ruta 404 - debe estar antes del errorHandler
 app.use(notFound);
