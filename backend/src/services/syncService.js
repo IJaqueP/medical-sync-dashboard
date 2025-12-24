@@ -225,7 +225,7 @@ export const syncAll = async (startDate, endDate, userId = null) => {
         }
         
         if (syncConfig.apis.snabb.enabled) {
-            const result = await syncSingleAPI('snabb', snabbService.syncBonos, startDate, endDate, userId);
+            const result = await syncSingleAPI('snabb', snabbService.syncVouchers, startDate, endDate, userId);
             results.apis.snabb = result;
             results.summary.total += result.recordsProcessed;
             results.summary.created += result.recordsCreated;
@@ -261,7 +261,7 @@ export const syncAll = async (startDate, endDate, userId = null) => {
 export const syncByAPI = async (apiName, startDate, endDate, userId = null) => {
     const syncFunctions = {
         reservo: reservoService.syncAppointments,
-        snabb: snabbService.syncBonos,
+        snabb: snabbService.syncVouchers,
         dtemite: dtemiteService.syncDocuments
     };
     

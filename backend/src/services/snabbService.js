@@ -280,11 +280,13 @@ export const checkConnection = async () => {
 };
 
 export default {
-    getBonos,
-    getBonoById,
-    getBonosByPatient,
-    getPrevisionInfo,
-    transformSnabbData,
-    syncBonos,
+    getVouchers,
+    getVoucherById,
+    createVoucher,
+    updateVoucherStatus,
+    verifyPatientDocument,
+    verifyEmail,
+    transformVoucherToAtencion,
+    syncVouchers,
     checkConnection
 };
