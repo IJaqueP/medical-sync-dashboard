@@ -35,6 +35,32 @@ router.get(
 );
 
 /**
+ * GET /api/atenciones/count-public
+ * Obtener conteo de atenciones (sin autenticación para verificación)
+ */
+router.get('/count-public', async (req, res) => {
+    try {
+        const { Atencion } = await import('../models/index.js');
+        const count = await Atencion.count();
+        const sample = await Atencion.findAll({ limit: 3, order: [['createdAt', 'DESC']] });
+        res.json({ 
+            success: true, 
+            count, 
+            sample: sample.map(a => ({
+                id: a.id,
+                pacienteRut: a.pacienteRut,
+                folio: a.folio,
+                bonoEstado: a.bonoEstado,
+                prestacion: a.prestacion,
+                fechaAtencion: a.fechaAtencion
+            }))
+        });
+    } catch (error) {
+        res.json({ success: false, error: error.message });
+    }
+});
+
+/**
  * GET /api/atenciones/estadisticas
  * Obtener estadísticas de atenciones
  * Requiere autenticación
