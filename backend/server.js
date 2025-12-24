@@ -160,6 +160,57 @@ app.post('/debug/clean-db', async (req, res) => {
     }
 });
 
+// Endpoint para probar creación de voucher en Snabb - TEMPORAL
+app.post('/debug/test-snabb', async (req, res) => {
+    if (process.env.NODE_ENV !== 'production') {
+        return res.status(403).json({ error: 'Solo disponible en producción' });
+    }
+    
+    try {
+        const snabbService = await import('./src/services/snabbService.js');
+        
+        // Verificar conexión
+        const connectionStatus = await snabbService.checkConnection();
+        
+        if (connectionStatus.status === 'error') {
+            return res.status(500).json({
+                error: 'Error de configuración de Snabb',
+                details: connectionStatus
+            });
+        }
+        
+        // Datos de prueba para crear un voucher
+        const testVoucherData = {
+            beneficiarioRun: req.body.beneficiarioRun || '12345678-9',
+            codigoSucursal: '0',
+            codigoPrestacion: req.body.codigoPrestacion || '0101001',
+            callbackUrl: 'https://medical-sync-dashboard-1.onrender.com/api/snabb/callback',
+            redirectUrl: 'https://ijaquep.github.io/medical-sync-dashboard',
+            fechaExpiracion: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 días
+            organizationRut: process.env.SNABB_ORGANIZATION_RUT,
+            practitionerNombre: req.body.practitionerNombre || 'Dr. Test',
+            practitionerRun: req.body.practitionerRun || '11111111-1'
+        };
+        
+        // Intentar crear el voucher
+        const voucher = await snabbService.createVoucher(testVoucherData);
+        
+        res.json({
+            success: true,
+            message: 'Voucher creado exitosamente en Snabb',
+            connectionStatus,
+            voucherData: testVoucherData,
+            voucherResponse: voucher
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            error: error.message, 
+            stack: error.stack,
+            response: error.response?.data || null
+        });
+    }
+});
+
 // Ruta raíz
 app.get('/', (req, res) => {
     res.json({
