@@ -154,6 +154,47 @@ const Atencion = sequelize.define('Atencion', {
         defaultValue: 0.00
     },
 
+    montoBonificado: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        field: 'monto_bonificado',
+        comment: 'Monto que bonifica Fonasa'
+    },
+
+    folio: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: 'Folio del voucher de Snabb'
+    },
+
+    voucherHash: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        field: 'voucher_hash',
+        comment: 'Hash de autorización del voucher'
+    },
+
+    voucherUrl: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        field: 'voucher_url',
+        comment: 'URL del voucher de Snabb'
+    },
+
+    codigoPrestacion: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        field: 'codigo_prestacion',
+        comment: 'Código de prestación Fonasa'
+    },
+
+    fechaExpiracion: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'fecha_expiracion',
+        comment: 'Fecha de expiración del voucher'
+    },
+
 
     /* INFORMACIÓN DE FACTURACIÓN (DTEMITE) */
 
