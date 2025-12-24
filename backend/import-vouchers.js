@@ -20,7 +20,9 @@ async function importVouchers() {
             { vouchers },
             {
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 300000 // 5 minutos de timeout
+                timeout: 600000, // 10 minutos de timeout
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity
             }
         );
         

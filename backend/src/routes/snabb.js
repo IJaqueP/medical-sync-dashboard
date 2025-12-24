@@ -4,6 +4,7 @@ import express from 'express';
 import logger from '../utils/logger.js';
 import { Atencion } from '../models/index.js';
 import { transformVoucherToAtencion } from '../services/snabbService.js';
+import crypto from 'crypto';
 
 const router = express.Router();
 
@@ -463,7 +464,7 @@ router.post('/bulk-import-extracted', async (req, res) => {
                     
                     // Datos del bono
                     folio: v.folio || null,
-                    bonoNumero: v.folio || `TEMP-${Date.now()}-${Math.random()}`,
+                    bonoNumero: v.folio || `SNABB-${crypto.randomUUID()}`,
                     bonoEstado: bonoEstado,
                     bonoFechaEmision: fechaAtencion,
                     
@@ -498,10 +499,13 @@ router.post('/bulk-import-extracted', async (req, res) => {
                 logger.logInfo(`[Bulk Import] Lote ${Math.floor(i / batchSize) + 1} importado: ${atencionesData.length} registros`);
                 
             } catch (error) {
+                const errorMsg = error.message || error.toString();
                 logger.logError(`[Bulk Import] Error en lote ${Math.floor(i / batchSize) + 1}:`, error);
+                console.error(`[Bulk Import] Error detallado:`, error);
                 results.errors.push({
                     batch: Math.floor(i / batchSize) + 1,
-                    error: error.message
+                    error: errorMsg,
+                    details: error.stack
                 });
             }
         }
