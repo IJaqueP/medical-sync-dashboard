@@ -100,4 +100,162 @@ router.get('/test-callback', (req, res) => {
     });
 });
 
+/**
+ * POST /api/snabb/import-voucher
+ * Importar un voucher específico por ID
+ */
+router.post('/import-voucher', async (req, res) => {
+    try {
+        const { voucherId } = req.body;
+        
+        if (!voucherId) {
+            return res.status(400).json({
+                error: 'Se requiere voucherId'
+            });
+        }
+        
+        logger.logInfo(`[Snabb] Importando voucher: ${voucherId}`);
+        
+        // Importar el servicio de Snabb
+        const snabbService = await import('../services/snabbService.js');
+        
+        // Obtener el voucher de Snabb
+        const voucherData = await snabbService.getVoucherById(voucherId);
+        
+        // Buscar si ya existe
+        const existingAtencion = await Atencion.findOne({
+            where: { snabbId: voucherData.id }
+        });
+        
+        // Transformar y guardar
+        const atencionData = {
+            snabbId: voucherData.id,
+            folio: voucherData.folio,
+            pacienteRut: voucherData.beneficiario?.run,
+            pacienteNombre: voucherData.beneficiario?.nombre || 'N/A',
+            prevision: 'Fonasa',
+            planSalud: voucherData.beneficiario?.tramo,
+            bonoNumero: voucherData.folio || voucherData.id,
+            bonoEstado: voucherData.status,
+            bonoMonto: parseFloat(voucherData.amount?.montoTotal || 0),
+            bonoFechaEmision: voucherData.fechaEmision || voucherData.createdAt,
+            copago: parseFloat(voucherData.amount?.montoCopago || 0),
+            montoBonificado: parseFloat(voucherData.amount?.montoBonificado || 0),
+            prestacion: voucherData.prestaciones?.[0]?.descripcion || voucherData.prestaciones?.[0]?.codigo || 'N/A',
+            codigoPrestacion: voucherData.prestaciones?.[0]?.codigo,
+            fechaAtencion: voucherData.fechaHoraAtencion || voucherData.createdAt,
+            fechaExpiracion: voucherData.fechaExpiracion,
+            voucherHash: voucherData.paymentInfo?.authorizationCode,
+            voucherUrl: voucherData.voucherUrl,
+            sistema: 'Snabb',
+            estadoSincronizacion: 'sincronizado'
+        };
+        
+        let atencion;
+        if (existingAtencion) {
+            await existingAtencion.update(atencionData);
+            atencion = existingAtencion;
+        } else {
+            atencion = await Atencion.create(atencionData);
+        }
+        
+        res.json({
+            success: true,
+            message: 'Voucher importado correctamente',
+            atencion
+        });
+        
+    } catch (error) {
+        logger.logError('[Snabb] Error importando voucher:', error);
+        res.status(500).json({
+            error: error.message,
+            details: error.response?.data || null
+        });
+    }
+});
+
+/**
+ * POST /api/snabb/import-batch
+ * Importar múltiples vouchers por IDs
+ */
+router.post('/import-batch', async (req, res) => {
+    try {
+        const { voucherIds } = req.body;
+        
+        if (!Array.isArray(voucherIds) || voucherIds.length === 0) {
+            return res.status(400).json({
+                error: 'Se requiere un array de voucherIds'
+            });
+        }
+        
+        logger.logInfo(`[Snabb] Importando ${voucherIds.length} vouchers`);
+        
+        const snabbService = await import('../services/snabbService.js');
+        const results = {
+            success: [],
+            errors: []
+        };
+        
+        for (const voucherId of voucherIds) {
+            try {
+                const voucherData = await snabbService.getVoucherById(voucherId);
+                
+                const existingAtencion = await Atencion.findOne({
+                    where: { snabbId: voucherData.id }
+                });
+                
+                const atencionData = {
+                    snabbId: voucherData.id,
+                    folio: voucherData.folio,
+                    pacienteRut: voucherData.beneficiario?.run,
+                    pacienteNombre: voucherData.beneficiario?.nombre || 'N/A',
+                    prevision: 'Fonasa',
+                    planSalud: voucherData.beneficiario?.tramo,
+                    bonoNumero: voucherData.folio || voucherData.id,
+                    bonoEstado: voucherData.status,
+                    bonoMonto: parseFloat(voucherData.amount?.montoTotal || 0),
+                    bonoFechaEmision: voucherData.fechaEmision || voucherData.createdAt,
+                    copago: parseFloat(voucherData.amount?.montoCopago || 0),
+                    montoBonificado: parseFloat(voucherData.amount?.montoBonificado || 0),
+                    prestacion: voucherData.prestaciones?.[0]?.descripcion || voucherData.prestaciones?.[0]?.codigo || 'N/A',
+                    codigoPrestacion: voucherData.prestaciones?.[0]?.codigo,
+                    fechaAtencion: voucherData.fechaHoraAtencion || voucherData.createdAt,
+                    fechaExpiracion: voucherData.fechaExpiracion,
+                    voucherHash: voucherData.paymentInfo?.authorizationCode,
+                    voucherUrl: voucherData.voucherUrl,
+                    sistema: 'Snabb',
+                    estadoSincronizacion: 'sincronizado'
+                };
+                
+                if (existingAtencion) {
+                    await existingAtencion.update(atencionData);
+                } else {
+                    await Atencion.create(atencionData);
+                }
+                
+                results.success.push(voucherId);
+                
+            } catch (error) {
+                logger.logError(`[Snabb] Error importando voucher ${voucherId}:`, error);
+                results.errors.push({
+                    voucherId,
+                    error: error.message
+                });
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: `Importación completada: ${results.success.length} exitosos, ${results.errors.length} errores`,
+            results
+        });
+        
+    } catch (error) {
+        logger.logError('[Snabb] Error en importación batch:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 export default router;
