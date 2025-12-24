@@ -382,4 +382,142 @@ router.post('/simulate-callback', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/snabb/bulk-import-extracted
+ * Importa vouchers extraídos del panel de Snabb
+ */
+router.post('/bulk-import-extracted', async (req, res) => {
+    try {
+        const { vouchers } = req.body;
+        
+        if (!Array.isArray(vouchers)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Se esperaba un array de vouchers'
+            });
+        }
+        
+        logger.logInfo(`[Bulk Import] Iniciando importación de ${vouchers.length} vouchers`);
+        
+        const results = {
+            imported: 0,
+            skipped: 0,
+            errors: []
+        };
+        
+        // Mapeo de estados de español a inglés
+        const estadoMap = {
+            'Solicitado': 'Requested',
+            'Pagado': 'Payed',
+            'Anulado': 'Cancelled',
+            'En Proceso': 'In Process',
+            'Rechazado': 'Rejected',
+            'Aprobado': 'Approved',
+            'Pendiente': 'Pending'
+        };
+        
+        // Función para parsear fecha chilena (DD/MM/YYYY, HH:mm:ss)
+        const parseChileanDate = (dateStr) => {
+            if (!dateStr) return null;
+            
+            try {
+                // Formato: "23/12/2025, 21:02:12"
+                const [datePart, timePart] = dateStr.split(', ');
+                const [day, month, year] = datePart.split('/').map(n => parseInt(n));
+                
+                if (timePart) {
+                    const [hours, minutes, seconds] = timePart.split(':').map(n => parseInt(n));
+                    return new Date(year, month - 1, day, hours, minutes, seconds);
+                }
+                
+                return new Date(year, month - 1, day);
+            } catch (error) {
+                logger.logError(`[Bulk Import] Error parseando fecha: ${dateStr}`, error);
+                return null;
+            }
+        };
+        
+        // Procesar en lotes de 500
+        const batchSize = 500;
+        for (let i = 0; i < vouchers.length; i += batchSize) {
+            const batch = vouchers.slice(i, i + batchSize);
+            
+            const atencionesData = batch.map(v => {
+                // Obtener nombre del profesional (puede estar en formato "Nombre Apellido")
+                const nombreProfesional = v.profesional || 'N/A';
+                
+                // Parsear fecha
+                const fechaAtencion = parseChileanDate(v.fechaSolicitud);
+                
+                // Mapear estado
+                const bonoEstado = estadoMap[v.estado] || v.estado || 'Unknown';
+                
+                return {
+                    // Datos del paciente
+                    pacienteRut: v.run,
+                    pacienteNombre: 'N/A', // No disponible en extracción
+                    
+                    // Datos del bono
+                    folio: v.folio || null,
+                    bonoNumero: v.folio || `TEMP-${Date.now()}-${Math.random()}`,
+                    bonoEstado: bonoEstado,
+                    bonoFechaEmision: fechaAtencion,
+                    
+                    // Datos de la prestación
+                    prestacion: v.nombreServicio || 'N/A',
+                    codigoPrestacion: v.codigoServicio,
+                    
+                    // Datos del profesional
+                    prestador: nombreProfesional,
+                    
+                    // Datos generales
+                    fechaAtencion: fechaAtencion,
+                    prevision: 'Fonasa',
+                    sistema: 'Snabb',
+                    estadoSincronizacion: 'sincronizado',
+                    
+                    // Montos (no disponibles en extracción, se pueden enriquecer después)
+                    bonoMonto: 0,
+                    copago: 0,
+                    montoBonificado: 0
+                };
+            });
+            
+            try {
+                // Importar lote con updateOnDuplicate para manejar duplicados
+                await Atencion.bulkCreate(atencionesData, {
+                    updateOnDuplicate: ['bonoEstado', 'fechaAtencion', 'prestador', 'updatedAt'],
+                    validate: true
+                });
+                
+                results.imported += atencionesData.length;
+                logger.logInfo(`[Bulk Import] Lote ${Math.floor(i / batchSize) + 1} importado: ${atencionesData.length} registros`);
+                
+            } catch (error) {
+                logger.logError(`[Bulk Import] Error en lote ${Math.floor(i / batchSize) + 1}:`, error);
+                results.errors.push({
+                    batch: Math.floor(i / batchSize) + 1,
+                    error: error.message
+                });
+            }
+        }
+        
+        logger.logInfo(`[Bulk Import] Importación completada: ${results.imported} importados, ${results.skipped} omitidos, ${results.errors.length} errores`);
+        
+        res.json({
+            success: true,
+            message: `${results.imported} vouchers importados correctamente`,
+            results
+        });
+        
+    } catch (error) {
+        logger.logError('[Bulk Import] Error en importación bulk:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error en la importación bulk',
+            error: error.message
+        });
+    }
+});
+
 export default router;
