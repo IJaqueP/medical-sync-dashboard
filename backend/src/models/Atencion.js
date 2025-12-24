@@ -54,7 +54,7 @@ const Atencion = sequelize.define('Atencion', {
 
     pacienteEmail: {
         type: DataTypes.STRING(100),
-        allowNull: false,
+        allowNull: true,
         field: 'paciente_email',
         validate: {
             isEmail: true
@@ -76,7 +76,7 @@ const Atencion = sequelize.define('Atencion', {
 
     fechaCita: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
         field: 'fecha_cita'
     },
 
