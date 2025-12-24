@@ -413,7 +413,11 @@ router.post('/bulk-import-extracted', async (req, res) => {
             'En Proceso': 'In Process',
             'Rechazado': 'Rejected',
             'Aprobado': 'Approved',
-            'Pendiente': 'Pending'
+            'Pendiente': 'Pending',
+            'Atendido': 'Attended',
+            'Pendiente de pago': 'Pending Payment',
+            'Pendiente de verificación': 'Pending Verification',
+            'Reembolsado': 'Refunded'
         };
         
         // Función para parsear fecha chilena (DD/MM/YYYY, HH:mm:ss)
