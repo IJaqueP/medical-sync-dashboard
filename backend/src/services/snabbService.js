@@ -46,29 +46,21 @@ snabbClient.interceptors.response.use(
 /**
  * Obtener todos los vouchers (bonos) de la organización
  * GET /vouchers
+ * 
+ * NOTA: La API de Snabb NO proporciona un endpoint para listar todos los vouchers.
+ * Los vouchers solo se obtienen a través de callbacks automáticos cuando cambian de estado.
  */
 export const getVouchers = async (startDate, endDate) => {
     try {
-        logger.logInfo(`[Snabb] Obteniendo vouchers: ${startDate} - ${endDate}`);
+        logger.logInfo(`[Snabb] Solicitud de listado de vouchers: ${startDate} - ${endDate}`);
+        logger.logInfo('[Snabb] INFO: API no proporciona endpoint de listado - usar callbacks');
         
-        // La API de Snabb no tiene endpoint directo para listar todos los vouchers con filtro de fecha
-        // Necesitaremos implementar según la documentación real o usar otro endpoint
-        
-        // Por ahora retornamos array vacío hasta tener más información
-        logger.logInfo('[Snabb] Endpoint de listado de vouchers no disponible en la documentación');
+        // Retornar array vacío con mensaje informativo
         return [];
         
     } catch (error) {
         logger.logError('[Snabb] Error al obtener vouchers:', error);
-        
-        if (error.response) {
-            throw new ApiError(
-                error.response.status,
-                `Error Snabb: ${error.response.data?.message || error.message}`
-            );
-        }
-        
-        throw new ApiError(500, 'Error de conexión con Snabb');
+        throw new ApiError(500, 'Snabb no proporciona endpoint de listado de vouchers');
     }
 };
 

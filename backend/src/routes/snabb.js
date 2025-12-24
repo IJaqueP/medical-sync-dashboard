@@ -258,4 +258,128 @@ router.post('/import-batch', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/snabb/simulate-callback
+ * Simular callback de Snabb con datos de prueba
+ * Útil para poblar la base de datos con vouchers de ejemplo
+ */
+router.post('/simulate-callback', async (req, res) => {
+    try {
+        logger.logInfo('[Snabb] Simulando callback con datos de prueba');
+        
+        // Datos de ejemplo basados en los vouchers reales que mostraste
+        const testVouchers = [
+            {
+                id: '1231eb0e9f292ec5c71402583eaa5db1f20345846b88d3a6eed8b2e0a77fc58e',
+                folio: '432103997',
+                status: 'Payed',
+                beneficiario: {
+                    run: '20032385-8',
+                    nombre: 'Carolina Jiménez Chureo'
+                },
+                amount: {
+                    montoTotal: 45870,
+                    montoCopago: 28670,
+                    montoBonificado: 17200
+                },
+                prestaciones: [{
+                    codigo: '0101212',
+                    descripcion: 'CONSULTA MEDICA DE ESPECIALIDAD EN PSIQUIATRIA ADULTOS (1RA'
+                }],
+                createdAt: '2025-12-23T20:39:50Z',
+                fechaEmision: '2025-12-23T20:39:50Z'
+            },
+            {
+                id: 'voucher-' + Date.now() + '-1',
+                folio: null,
+                status: 'Requested',
+                beneficiario: {
+                    run: '20501567-1',
+                    nombre: 'María Fernanda Azócar Navarrete'
+                },
+                amount: {
+                    montoTotal: 0,
+                    montoCopago: 0,
+                    montoBonificado: 0
+                },
+                prestaciones: [{
+                    codigo: '0101212',
+                    descripcion: 'Consulta médica'
+                }],
+                createdAt: '2025-12-23T20:51:36Z',
+                fechaEmision: '2025-12-23T20:51:36Z'
+            },
+            {
+                id: 'voucher-' + Date.now() + '-2',
+                folio: null,
+                status: 'Requested',
+                beneficiario: {
+                    run: '13510278-4',
+                    nombre: 'Lisette García Mesina'
+                },
+                amount: {
+                    montoTotal: 0,
+                    montoCopago: 0,
+                    montoBonificado: 0
+                },
+                prestaciones: [{
+                    codigo: '0101212',
+                    descripcion: 'Consulta médica'
+                }],
+                createdAt: '2025-12-23T20:53:09Z',
+                fechaEmision: '2025-12-23T20:53:09Z'
+            }
+        ];
+        
+        let created = 0;
+        let updated = 0;
+        
+        for (const voucher of testVouchers) {
+            const existingAtencion = await Atencion.findOne({
+                where: { snabbId: voucher.id }
+            });
+            
+            const atencionData = {
+                snabbId: voucher.id,
+                folio: voucher.folio,
+                pacienteRut: voucher.beneficiario?.run,
+                pacienteNombre: voucher.beneficiario?.nombre || 'N/A',
+                prevision: 'Fonasa',
+                bonoNumero: voucher.folio || voucher.id,
+                bonoEstado: voucher.status,
+                bonoMonto: parseFloat(voucher.amount?.montoTotal || 0),
+                bonoFechaEmision: voucher.fechaEmision || voucher.createdAt,
+                copago: parseFloat(voucher.amount?.montoCopago || 0),
+                montoBonificado: parseFloat(voucher.amount?.montoBonificado || 0),
+                prestacion: voucher.prestaciones?.[0]?.descripcion || voucher.prestaciones?.[0]?.codigo || 'N/A',
+                codigoPrestacion: voucher.prestaciones?.[0]?.codigo,
+                fechaAtencion: voucher.createdAt,
+                voucherHash: voucher.paymentInfo?.authorizationCode,
+                sistema: 'Snabb',
+                estadoSincronizacion: 'sincronizado'
+            };
+            
+            if (existingAtencion) {
+                await existingAtencion.update(atencionData);
+                updated++;
+            } else {
+                await Atencion.create(atencionData);
+                created++;
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: `Callbacks simulados: ${created} creados, ${updated} actualizados`,
+            total: testVouchers.length
+        });
+        
+    } catch (error) {
+        logger.logError('[Snabb] Error simulando callbacks:', error);
+        res.status(500).json({
+            error: error.message
+        });
+    }
+});
+
 export default router;
